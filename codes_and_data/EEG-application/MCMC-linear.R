@@ -104,7 +104,7 @@ n <- 96
 n.eeg <- 14
 n.freqs <- 45
 
-M <- 15000
+M <- 150000
 ML <- (M/2)+1
 
 #load eeg data
