@@ -225,8 +225,6 @@ dev.off()
 
 #### estimating w_j(t)
 
-library(depth)
-
 dd=n.bases
 ss1 <- seq(1,dd)
 ss2 <- seq(dd+1,2*dd)
