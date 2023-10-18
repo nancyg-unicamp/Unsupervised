@@ -56,8 +56,8 @@ n.freqs <- 31
 ## Design matrix Z
 Z <- cbind(rep(1,n),covar)
 
-M <- 15000
-ML <- 10000+1
+M <- 150000
+ML <- (M/2)+1
 
 
 
@@ -322,32 +322,36 @@ for (s in ss){
 
 gamma.prev <- gamma.prev/length(ss)
 
+#################  Plots 
+
 dg<- rgb(0,100/255,0,alpha=0.5)
 mb <- rgb(123/255,104/255,238/255,alpha=0.5)
 r3<- rgb(220/255,20/255,60/255,alpha=0.5)
 
 
-#################  Plots 
+pdf("gamma-prev-0.pdf")
+barplot(t(gamma.prev[y.test==0,]),names.arg=y.test[y.test==0],legend.text=c("Pure zero","Low","High"),
+        args.legend=list(x="bottomleft",inset = c(0.05,0.05)),
+        col=c(r3,dg,mb),xlab="Number of sick days")
+dev.off()
 
-Class <- c(rep("Pure Zero",208),rep("Low",208),rep("High",208))
-Health <- c(y,y,y)
-Gamma.est<- c(gamma.est[1,],gamma.est[2,],gamma.est[3,])
+
+gammas.ord<-gamma.prev[y.test!=0,]
+y.ord<-y.test[y.test!=0]
+
+ord<-order(y.ord)
+
+y.ord1<-y.ord[ord]
+gamma.ord1<-gammas.ord[ord,]
 
 
-data <- data.frame(Health,Class,Gamma.est)
-colnames(data) <-  c("Health Events", "Class", "gamma")
-ggplot(data, aes(fill=Class, y=gamma, x=Health)) + 
-  geom_bar(position="fill", stat="identity",alpha=0.5) +
-  scale_fill_manual(name="Class",values=c("mediumslateblue","darkgreen","Red3"),
-                    labels=c("High", "Low","Pure Zero")) +
-  ylab("Estimated probabilities") + xlab("Number of Health Events")
-  theme_bw() + theme(panel.grid.minor = element_blank())
+pdf("gamma-prev-n0-new.pdf")
+barplot(t(gamma.ord1),names.arg=y.ord1,legend.text=c("Pure zero","Low","High"),
+        args.legend=list(x="bottomleft",inset = c(0.05,0.05)),
+        col=c(r3,dg,mb),xlab="Number of sick days")
 
-colnames(gamma_prev.frame) <- c("Health events", "gamma[1]","gamma[2]","gamma[3]")
+dev.off()
 
-tidy.g<-gather(gamma_prev.frame,key="Key",value="Values")
-
-ggplot(tidy.g, aes(fill=))
 
 
 
@@ -357,9 +361,9 @@ colnames(lambda.frame) <- c("lambda", "Intensity")
 lambda.frame$Intensity <- as.factor(lambda.frame$Intensity)
 
 ggplot(lambda.frame,aes(x=lambda)) +
-  geom_histogram(data=subset(lambda.frame,Intensity == 1),
+  geom_histogram(data=subset(lambda.frame,Intensity == 1), colour="black",
                  alpha = 0.5,bins=20,aes(y=..density.., fill=Intensity)) +
-  geom_histogram(data=subset(lambda.frame,Intensity == 2),
+  geom_histogram(data=subset(lambda.frame,Intensity == 2), colour="black",
                  alpha = 0.5,bins=20,aes(y=..density..,fill = Intensity)) +
   xlab(expression(lambda)) +
   scale_fill_manual(name="Intensity",values=c("darkgreen", "mediumslateblue"),
@@ -371,16 +375,17 @@ ggplot(lambda.frame,aes(x=lambda)) +
 
 
 
+
 theta.frame <- as.data.frame(cbind(rbind(theta1.post1[ss,],theta2.post1[ss,]),
-                                    c(rep(1,length(ss)),rep(2,length(ss)))))
+                                   c(rep(1,length(ss)),rep(2,length(ss)))))
 colnames(theta.frame) <- c("Intercept","theta[1]", "theta[2]", "theta[3]", "theta[4]", "Intensity")
 theta.frame$Intensity <- as.factor(theta.frame$Intensity)
 
 
 ggplot(theta.frame,aes(x=Intercept)) +
-  geom_histogram(data=subset(theta.frame,Intensity == 1),
+  geom_histogram(data=subset(theta.frame,Intensity == 1), colour="black",
                  alpha = 0.5,bins=7,aes(y=..density.., fill=Intensity)) +
-  geom_histogram(data=subset(theta.frame,Intensity == 2),
+  geom_histogram(data=subset(theta.frame,Intensity == 2), colour="black",
                  alpha = 0.5,bins=9,aes(y=..density..,fill = Intensity))+
   xlab("Intercept")  +
   scale_fill_manual(values=c("darkgreen", "mediumslateblue")) +
@@ -395,9 +400,9 @@ tidy <- gather(temp, key="Type", value = "Value", 2:5)
 
 
 ggplot(tidy,aes(x=Value)) +
-  geom_histogram(data=subset(tidy,Intensity == 1),
+  geom_histogram(data=subset(tidy,Intensity == 1), colour="black",
                  alpha = 0.5,bins=7,aes(y=..density.., fill=Intensity)) +
-  geom_histogram(data=subset(tidy,Intensity == 2),
+  geom_histogram(data=subset(tidy,Intensity == 2), colour="black",
                  alpha = 0.5,bins=9,aes(y=..density..,fill = Intensity))  +
   xlab("") +
   scale_fill_manual(name="Intensity",values=c("darkgreen", "mediumslateblue"),
@@ -406,3 +411,4 @@ ggplot(tidy,aes(x=Value)) +
                       panel.grid.minor = element_blank()) +
   facet_wrap(~Type, scales = "free", nrow=2,
              labeller = label_parsed)
+
